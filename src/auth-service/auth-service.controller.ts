@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
 import { AuthServiceService } from './auth-service.service';
 @Controller('auth-service')
 export class AuthServiceController {
@@ -30,10 +30,10 @@ export class AuthServiceController {
         return this.authservice.loginUser(logindata)
     }
 
-    @Patch('reset-password')
-    reset_pass(@Body() reset_data:{mobileoremail:string,new_pass:string})
+    @Patch(':id')
+    reset_pass(@Param('id', ParseIntPipe) id:number, @Body() reset_data:{mobileoremail:string,new_pass:string})
     {
-       return this.authservice.reset_pass(reset_data)
+       return this.authservice.reset_pass(+id,reset_data)
     }
 
     
