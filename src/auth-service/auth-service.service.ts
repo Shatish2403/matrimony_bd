@@ -1,5 +1,8 @@
-import { Injectable, NotFoundException, Res } from '@nestjs/common';
+import { Injectable, NotFoundException, Res, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs'
+import { CreateUserDto } from './dto/create-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { ResetPassDto} from './dto/reset-password.dto';
 @Injectable()
 export class AuthServiceService {
       userdata = [
@@ -19,33 +22,59 @@ export class AuthServiceService {
     
     
 
-    registerUser( registerdata: {name:string,email:string,mobile:string,password:string})
+    registerUser( createuserDto: CreateUserDto)
     {
         const newdata = {
             id: this.getlastid() + 1,
-            ...registerdata}
-        const hashed = bcrypt.hashSync(registerdata.password,10)
+            ...createuserDto}
+        
+        const tempuser =  this.userdata.find(user=> (newdata.email === user.email || newdata.mobile  === user.mobile))
+        if(tempuser){
+            if(tempuser.mobile  === newdata.mobile && tempuser.email === newdata.email){
+            return `User Already Exist as${JSON.stringify(tempuser.name)} with this Mobile and Mail ID. Try Logging In` }
+            else{
+                if(tempuser.mobile  === newdata.mobile){
+                    return `Already User ${tempuser.name} Registered with this Mobile Number `
+                }
+                else{
+                    return `Already User ${tempuser.name} Registered with this MailID `
+                }
+            }
+        }
+        else{
+        const hashed = bcrypt.hashSync(newdata.password,10)
         newdata.password = hashed
         this.userdata.push(newdata);
         return `Successfully Registered User : ${newdata.name}`
+        }
     }
     
-    loginUser(logindata:{mobileoremail:string,password:string}){
-        const loginuser = this.userdata.find(user => (logindata.mobileoremail===user.mobile || logindata.mobileoremail===user.email) &&  bcrypt.compareSync(logindata.password,user.password))
+    loginUser(loginuserdto:LoginUserDto){
+        const loginuser = this.userdata.find(user => (loginuserdto.mobileoremail===user.mobile || loginuserdto.mobileoremail===user.email))
         if(!loginuser){
-            return "No User Found"
+            throw new NotFoundException
         }
         else{
-            return `Successfully Logged in Mr ${loginuser.name}`
+            
+            if(bcrypt.compareSync(loginuserdto.password,loginuser.password)){
+                return `Successfully Logged in Mr ${loginuser.name}`}
+            else{
+
+                 throw new UnauthorizedException('Wrong Password',{
+                    description:"Password Did Not Match (Password is CaseSensitive)",
+                
+            })
+            }
+
         }
     }
-    reset_pass(id:number, reset_data :{mobileoremail:string,new_pass:string}){
+    reset_pass(id:number, resetpassworddto :ResetPassDto){
     
                 try{
-                   const tempuser =  {...this.userdata.find(user=> (user.id === id && user.mobile === reset_data.mobileoremail))}
+                   const tempuser =  this.userdata.find(user=> (user.id === id && user.mobile === resetpassworddto.mobileoremail))
                    if(!tempuser){
                    return `User Not Found`}
-                   tempuser.password = reset_data.new_pass
+                   tempuser.password = resetpassworddto.new_pass
                    return  `Successfully Updated the Password:${JSON.stringify(tempuser)}`
 
                 }   
