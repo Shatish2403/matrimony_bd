@@ -5,6 +5,8 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ResetPassDto} from './dto/reset-password.dto'
 import { MobileValDto } from './dto/mobiledto.dto';
 import { OtpValDto } from './dto/otpvaldto.dto';
+import { Prisma } from 'generated/prisma';
+
 @Controller('auth-service')
 export class AuthServiceController {
     constructor(private readonly authservice:AuthServiceService){}

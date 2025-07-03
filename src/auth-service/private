@@ -1,0 +1,12 @@
+DATABASE_URL="postgresql://neondb_owner:npg_dnSFBbxR3pm1@ep-empty-sun-a8pp0knx-pooler.eastus2.azure.neon.tech/matrimony_db?sslmode=require&channel_binding=require"
+# uncomment next line if you use Prisma <5.10
+# DATABASE_URL_UNPOOLED="postgresql://neondb_owner:npg_dnSFBbxR3pm1@ep-empty-sun-a8pp0knx.eastus2.azure.neon.tech/matrimony_db?sslmode=require&channel_binding=require"
+
+
+// prisma/schema.prisma
+datasource db {
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+  // uncomment next line if you use Prisma <5.10
+  // directUrl = env("DATABASE_URL_UNPOOLED")
+}
